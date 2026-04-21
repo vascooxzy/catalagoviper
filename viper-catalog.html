@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VIPER — Catálogo 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+:root {
+  --black:  #080808;
+  --ink:    #111111;
+  --deep:   #1a1a1a;
+  --slate:  #2c2c2c;
+  --gray:   #555;
+  --mid:    #888;
+  --silver: #bbb;
+  --fog:    #ddd;
+  --white:  #f2f2f2;
+  --pure:   #ffffff;
+  --expo:   cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Cormorant Garamond', serif;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* CURSOR */
+#cur {
+  position: fixed; z-index: 9999; pointer-events: none;
+  width: 8px; height: 8px; background: var(--white);
+  border-radius: 50%; transform: translate(-50%,-50%);
+  mix-blend-mode: difference;
+  transition: width .2s, height .2s;
+}
+#cur-ring {
+  position: fixed; z-index: 9998; pointer-events: none;
+  width: 40px; height: 40px;
+  border: 1px solid rgba(255,255,255,.25); border-radius: 50%;
+  transform: translate(-50%,-50%);
+  transition: width .4s var(--expo), height .4s var(--expo), border-color .3s;
+}
+.hoverable:hover ~ #cur, body:has(.hoverable:hover) #cur { width: 18px; height: 18px; }
+body:has(.hoverable:hover) #cur-ring { width: 60px; height: 60px; border-color: rgba(255,255,255,.5); }
+body:has(button:hover) #cur { width: 18px; height: 18px; }
+body:has(button:hover) #cur-ring { width: 60px; height: 60px; border-color: rgba(255,255,255,.5); }
+body:has(a:hover) #cur { width: 18px; height: 18px; }
+body:has(a:hover) #cur-ring { width: 60px; height: 60px; border-color: rgba(255,255,255,.5); }
+
+/* TRANSITION OVERLAY */
+#tov {
+  position: fixed; inset: 0; z-index: 9000; pointer-events: none;
+  display: grid; grid-template-columns: repeat(5, 1fr);
+}
+.tc {
+  background: var(--ink);
+  transform: scaleY(0); transform-origin: bottom;
+}
+.tc:nth-child(1){ transition: transform .55s 0s var(--expo); }
+.tc:nth-child(2){ transition: transform .55s .06s var(--expo); }
+.tc:nth-child(3){ transition: transform .55s .12s var(--expo); }
+.tc:nth-child(4){ transition: transform .55s .18s var(--expo); }
+.tc:nth-child(5){ transition: transform .55s .24s var(--expo); }
+#tov.in  .tc { transform: scaleY(1); transform-origin: bottom; }
+#tov.out .tc { transform: scaleY(0); transform-origin: top; }
+
+/* LOADER */
+#loader {
+  position: fixed; inset: 0; z-index: 8000;
+  background: var(--black);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 2rem;
+  transition: opacity .8s var(--expo);
+}
+#loader.gone { opacity: 0; pointer-events: none; }
+.l-logo {
+  font-family: 'Bebas Neue', sans-serif; font-size: 5rem;
+  letter-spacing: .25em;
+  background: linear-gradient(180deg, var(--pure) 0%, var(--gray) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: lpulse 1.5s ease-in-out infinite;
+}
+@keyframes lpulse { 0%,100%{opacity:.2} 50%{opacity:1} }
+.l-track { width: 180px; height: 1px; background: var(--slate); overflow: hidden; }
+.l-bar   { height: 100%; width: 0; background: var(--white); transition: width .05s linear; }
+.l-pct   { font-family: 'DM Mono', monospace; font-size: .5rem; letter-spacing: .4em; color: var(--gray); }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+  padding: 2rem 3.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  mix-blend-mode: difference;
+  opacity: 0; animation: navshow 1s 2.4s var(--expo) forwards;
+}
+@keyframes navshow { to{opacity:1} }
+.nav-logo {
+  font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem;
+  letter-spacing: .25em; color: var(--white); text-decoration: none; cursor: none;
+}
+.nav-links { display: flex; gap: 3rem; list-style: none; }
+.nav-links a {
+  font-family: 'DM Mono', monospace; font-size: .52rem;
+  letter-spacing: .3em; color: var(--white); text-decoration: none;
+  text-transform: uppercase; cursor: none; position: relative;
+}
+.nav-links a::after {
+  content: ''; position: absolute; bottom: -3px; left: 0;
+  width: 0; height: 1px; background: var(--white);
+  transition: width .4s var(--expo);
+}
+.nav-links a:hover::after { width: 100%; }
+.nav-credit {
+  font-family: 'DM Mono', monospace; font-size: .48rem;
+  letter-spacing: .28em; color: var(--gray); text-transform: uppercase;
+}
+
+/* HERO */
+#hero {
+  height: 100vh;
+  background: var(--black);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; position: relative;
+}
+.h-noise {
+  position: absolute; inset: 0; opacity: .025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px;
+}
+.h-scales {
+  position: absolute; inset: 0; pointer-events: none; opacity: .022;
+  background-image:
+    radial-gradient(ellipse 15px 11px at 15px 11px, var(--mid) 68%, transparent 69%),
+    radial-gradient(ellipse 15px 11px at 0 11px, var(--mid) 68%, transparent 69%);
+  background-size: 30px 22px;
+  background-position: 0 0, 15px 11px;
+}
+.h-snake { position: absolute; opacity: .07; }
+.h-snake.l { left: -30px; top: 5%; height: 90%; }
+.h-snake.r { right: -30px; bottom: 5%; height: 90%; transform: scaleX(-1); }
+
+.h-content { position: relative; z-index: 2; text-align: center; }
+.h-pre {
+  font-family: 'DM Mono', monospace; font-size: .52rem;
+  letter-spacing: .6em; color: var(--gray); text-transform: uppercase;
+  opacity: 0; transform: translateY(12px);
+  animation: rise .9s 2.2s var(--expo) forwards;
+}
+.h-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(9rem, 24vw, 20rem);
+  line-height: .85; letter-spacing: .05em;
+  background: linear-gradient(165deg, var(--pure) 0%, var(--silver) 50%, var(--gray) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  opacity: 0; transform: translateY(30px);
+  animation: rise 1.2s 2.4s var(--expo) forwards;
+}
+.h-sep {
+  width: 0; height: 1px; margin: 1.8rem auto;
+  background: linear-gradient(90deg, transparent, var(--mid), transparent);
+  animation: widen .8s 3s var(--expo) forwards;
+}
+@keyframes widen { to{width:120px} }
+.h-tag {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: clamp(1rem, 2vw, 1.4rem); font-weight: 300;
+  color: var(--silver); letter-spacing: .15em;
+  opacity: 0; transform: translateY(10px);
+  animation: rise .8s 3.1s var(--expo) forwards;
+}
+.h-ctas {
+  margin-top: 3.5rem; display: flex; gap: 1.5rem; justify-content: center;
+  opacity: 0; animation: rise .8s 3.3s var(--expo) forwards;
+}
+.h-scroll {
+  position: absolute; bottom: 2.5rem; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: .5rem;
+  opacity: 0; animation: rise .8s 3.6s var(--expo) forwards;
+}
+.h-scroll span {
+  font-family: 'DM Mono', monospace; font-size: .44rem;
+  letter-spacing: .4em; color: var(--gray); text-transform: uppercase;
+}
+.h-sline { width: 1px; height: 44px; overflow: hidden; position: relative; }
+.h-sline::after {
+  content: ''; position: absolute; top: -100%; left: 0;
+  width: 1px; height: 100%;
+  background: linear-gradient(to bottom, transparent, var(--mid), transparent);
+  animation: sdrop 2s 4.2s ease-in-out infinite;
+}
+@keyframes sdrop { 0%{top:-100%} 100%{top:200%} }
+@keyframes rise { to{opacity:1; transform:translateY(0)} }
+
+/* BUTTONS */
+.btn {
+  font-family: 'DM Mono', monospace; font-size: .52rem;
+  letter-spacing: .4em; text-transform: uppercase;
+  padding: 1.1rem 2.8rem; cursor: none; border: none;
+  position: relative; overflow: hidden;
+  transition: all .35s var(--expo);
+}
+.btn::before {
+  content: ''; position: absolute; inset: 0;
+  background: rgba(255,255,255,.06);
+  transform: translateX(-101%);
+  transition: transform .5s var(--expo);
+}
+.btn:hover::before { transform: translateX(0); }
+.btn-w { background: var(--white); color: var(--black); }
+.btn-w:hover { background: var(--fog); }
+.btn-g { background: transparent; color: var(--mid); border: 1px solid var(--slate); }
+.btn-g:hover { color: var(--white); border-color: var(--mid); }
+
+/* MANIFESTO */
+#manifesto {
+  display: grid; grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+  border-top: 1px solid var(--slate);
+}
+.m-left {
+  padding: 10rem 5rem 8rem;
+  background: var(--black);
+  border-right: 1px solid var(--slate);
+  display: flex; flex-direction: column; justify-content: center;
+}
+.eyebrow {
+  font-family: 'DM Mono', monospace; font-size: .5rem;
+  letter-spacing: .55em; color: var(--gray); text-transform: uppercase;
+  margin-bottom: 2rem;
+}
+.m-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3rem, 4.5vw, 5rem);
+  letter-spacing: .06em; line-height: .95; color: var(--white);
+}
+.m-title em {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: .58em; color: var(--mid); display: block;
+  letter-spacing: .12em; margin-top: .5rem; font-weight: 300;
+}
+.m-body {
+  margin-top: 2.5rem; font-size: 1.05rem; font-weight: 300;
+  line-height: 2; color: var(--silver);
+}
+.m-body strong { color: var(--white); font-weight: 600; }
+.m-quote {
+  margin-top: 2.5rem; padding-left: 1.5rem;
+  border-left: 2px solid var(--slate);
+  font-style: italic; font-size: 1.05rem; color: var(--mid); line-height: 1.9;
+}
+.m-right {
+  background: var(--ink); position: relative; overflow: hidden;
+}
+.m-right::after {
+  content: ''; position: absolute; inset: 0;
+  background: repeating-linear-gradient(45deg,
+    transparent, transparent 3px,
+    rgba(255,255,255,.006) 3px, rgba(255,255,255,.006) 4px);
+}
+.m-snake {
+  position: absolute; inset: 0; z-index: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.m-snake svg { width: 55%; opacity: .08; }
+.m-rl {
+  position: absolute; bottom: 2.5rem; right: 2.5rem; z-index: 2;
+  font-family: 'DM Mono', monospace; font-size: .44rem;
+  letter-spacing: .45em; color: var(--gray); text-transform: uppercase;
+  writing-mode: vertical-rl;
+}
+
+/* MARQUEE */
+.mq { overflow: hidden; background: var(--black); padding: 1rem 0;
+  border-top: 1px solid var(--slate); border-bottom: 1px solid var(--slate); }
+.mq-inner { display: flex; white-space: nowrap; animation: tick 18s linear infinite; }
+.mq-inner:hover { animation-play-state: paused; }
+.mq-item {
+  display: inline-flex; align-items: center; gap: 2rem; padding: 0 2rem;
+  font-family: 'Bebas Neue', sans-serif; font-size: .82rem;
+  letter-spacing: .35em; color: var(--slate);
+}
+.mq-dot { width: 4px; height: 4px; background: var(--slate); border-radius: 50%; flex-shrink: 0; }
+@keyframes tick { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* COLLECTION */
+#collection { background: var(--ink); border-top: 1px solid var(--slate); }
+.col-hdr {
+  padding: 7rem 5rem 4rem;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  border-bottom: 1px solid var(--slate);
+}
+.col-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3rem, 5.5vw, 5.5rem);
+  letter-spacing: .06em; color: var(--white); line-height: 1;
+}
+.col-desc {
+  max-width: 300px; font-style: italic; font-size: 1rem;
+  color: var(--mid); line-height: 1.8; text-align: right;
+}
+.pgrid { display: grid; grid-template-columns: repeat(3, 1fr); }
+.pcard {
+  position: relative; overflow: hidden; cursor: none;
+  background: var(--deep);
+  border-right: 1px solid var(--slate);
+  border-bottom: 1px solid var(--slate);
+}
+.pcard:last-child { border-right: none; }
+.pv { aspect-ratio: 2/3; position: relative; overflow: hidden; }
+.pcard-1 .pv { background: radial-gradient(ellipse at 30% 25%, rgba(90,90,90,.22) 0%, var(--deep) 65%); }
+.pcard-2 .pv { background: radial-gradient(ellipse at 70% 30%, rgba(55,55,55,.28) 0%, var(--ink) 60%); }
+.pcard-3 .pv { background: radial-gradient(ellipse at 50% 70%, rgba(70,70,70,.2) 0%, var(--deep) 65%); }
+.pscales {
+  position: absolute; inset: 0; opacity: .04;
+  background-image:
+    radial-gradient(ellipse 11px 8px at 11px 8px, var(--mid) 68%, transparent 69%),
+    radial-gradient(ellipse 11px 8px at 0 8px, var(--mid) 68%, transparent 69%);
+  background-size: 22px 16px; background-position: 0 0, 11px 8px;
+  transition: opacity .6s;
+}
+.pcard:hover .pscales { opacity: .09; }
+.picon {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 1;
+  transition: transform .8s var(--expo);
+}
+.pcard:hover .picon { transform: scale(1.05) translateY(-10px); }
+.picon svg { opacity: .22; width: 110px; transition: opacity .5s; }
+.pcard:hover .picon svg { opacity: .38; }
+.pref {
+  position: absolute; top: 1.5rem; left: 1.5rem; z-index: 2;
+  font-family: 'DM Mono', monospace; font-size: .44rem;
+  letter-spacing: .4em; color: var(--gray);
+}
+/* Corner marks */
+.cm { position: absolute; width: 16px; height: 16px; }
+.cm-tl{top:0;left:0;border-top:1px solid var(--gray);border-left:1px solid var(--gray);}
+.cm-tr{top:0;right:0;border-top:1px solid var(--gray);border-right:1px solid var(--gray);}
+.cm-bl{bottom:0;left:0;border-bottom:1px solid var(--gray);border-left:1px solid var(--gray);}
+.cm-br{bottom:0;right:0;border-bottom:1px solid var(--gray);border-right:1px solid var(--gray);}
+/* Hover reveal */
+.prev {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(8,8,8,.95) 0%, rgba(8,8,8,.35) 55%, transparent 100%);
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 2rem; z-index: 3;
+  transform: translateY(28%); opacity: 0;
+  transition: transform .6s var(--expo), opacity .4s;
+}
+.pcard:hover .prev { transform: translateY(0); opacity: 1; }
+.prev-series {
+  font-family: 'DM Mono', monospace; font-size: .44rem;
+  letter-spacing: .5em; color: var(--mid); text-transform: uppercase; margin-bottom: .4rem;
+}
+.prev-name { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: .08em; color: var(--white); }
+.prev-desc { font-style: italic; font-size: .9rem; color: var(--silver); margin-top: .4rem; line-height: 1.6; }
+.pinfo {
+  padding: 1.7rem 2rem; display: flex; justify-content: space-between; align-items: center;
+  border-top: 1px solid rgba(255,255,255,.04);
+}
+.pname { font-family: 'Bebas Neue', sans-serif; font-size: 1.15rem; letter-spacing: .1em; color: var(--white); }
+.ptag {
+  font-family: 'DM Mono', monospace; font-size: .44rem;
+  letter-spacing: .3em; color: var(--gray); text-transform: uppercase;
+  border: 1px solid var(--slate); padding: .3rem .7rem;
+}
+
+/* FEATURES */
+#features { background: var(--black); border-top: 1px solid var(--slate); }
+.feat-hdr { padding: 6rem 5rem 3rem; border-bottom: 1px solid var(--slate); }
+.fgrid { display: grid; grid-template-columns: repeat(4, 1fr); }
+.feat {
+  padding: 4.5rem 2.5rem; border-right: 1px solid var(--slate);
+  position: relative; overflow: hidden;
+}
+.feat:last-child { border-right: none; }
+.fn {
+  font-family: 'Bebas Neue', sans-serif; font-size: 4rem;
+  line-height: 1; color: var(--deep);
+  transition: color .5s, transform .5s var(--expo);
+}
+.feat:hover .fn { color: var(--slate); transform: scale(1.08) translateX(4px); }
+.ft {
+  font-family: 'Bebas Neue', sans-serif; font-size: 1.05rem;
+  letter-spacing: .12em; color: var(--white); margin: 1.1rem 0 .5rem;
+}
+.fb { font-style: italic; font-size: .88rem; color: var(--mid); line-height: 1.7; }
+.fl {
+  position: absolute; bottom: 0; left: 0;
+  height: 1px; width: 0; background: var(--mid);
+  transition: width .6s var(--expo);
+}
+.feat:hover .fl { width: 100%; }
+
+/* FOOTER */
+footer { background: var(--ink); border-top: 1px solid var(--slate); padding: 6rem 5rem 3rem; }
+.ft-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 5rem; margin-bottom: 5rem; }
+.f-logo {
+  font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; letter-spacing: .2em;
+  background: linear-gradient(180deg, var(--white) 0%, var(--gray) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  margin-bottom: 1.2rem;
+}
+.f-desc { font-style: italic; font-size: .92rem; color: var(--mid); line-height: 1.8; max-width: 240px; }
+.fc h4 {
+  font-family: 'DM Mono', monospace; font-size: .46rem;
+  letter-spacing: .5em; color: var(--gray); text-transform: uppercase; margin-bottom: 1.8rem;
+}
+.fc ul { list-style: none; display: flex; flex-direction: column; gap: .9rem; }
+.fc ul li { font-size: .95rem; color: var(--gray); cursor: none; transition: color .3s; }
+.fc ul li:hover { color: var(--white); }
+.ft-bot {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 2rem; border-top: 1px solid var(--slate);
+}
+.f-copy, .f-dev {
+  font-family: 'DM Mono', monospace; font-size: .44rem;
+  letter-spacing: .3em; color: var(--gray); text-transform: uppercase;
+}
+.f-dev span { color: var(--silver); }
+.f-soc { display: flex; gap: 2.5rem; }
+.f-soc a {
+  font-family: 'DM Mono', monospace; font-size: .44rem;
+  letter-spacing: .3em; color: var(--gray); text-decoration: none;
+  text-transform: uppercase; cursor: none; transition: color .3s;
+}
+.f-soc a:hover { color: var(--white); }
+
+/* REVEAL */
+.fu { opacity: 0; transform: translateY(38px); transition: opacity .9s var(--expo), transform .9s var(--expo); }
+.fu.vis { opacity: 1; transform: translateY(0); }
+.fu.d1{transition-delay:.1s} .fu.d2{transition-delay:.2s}
+.fu.d3{transition-delay:.3s} .fu.d4{transition-delay:.4s}
+
+/* SPLIT REVEAL */
+.sr .w { display: inline-block; overflow: hidden; vertical-align: bottom; margin-right: .22em; }
+.sr .w .i { display: inline-block; transform: translateY(110%); transition: transform .9s var(--expo); }
+.sr.vis .w:nth-child(1) .i{transition-delay:0s}
+.sr.vis .w:nth-child(2) .i{transition-delay:.08s}
+.sr.vis .w:nth-child(3) .i{transition-delay:.16s}
+.sr.vis .w:nth-child(4) .i{transition-delay:.24s}
+.sr.vis .w:nth-child(5) .i{transition-delay:.32s}
+.sr.vis .w .i { transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur-ring"></div>
+
+<!-- Transition overlay -->
+<div id="tov">
+  <div class="tc"></div><div class="tc"></div><div class="tc"></div>
+  <div class="tc"></div><div class="tc"></div>
+</div>
+
+<!-- Loader -->
+<div id="loader">
+  <div class="l-logo">VIPER</div>
+  <div class="l-track"><div class="l-bar" id="lbar"></div></div>
+  <div class="l-pct" id="lpct">0%</div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#hero">VIPER</a>
+  <ul class="nav-links">
+    <li><a href="#manifesto" data-nav>Manifesto</a></li>
+    <li><a href="#collection" data-nav>Coleção</a></li>
+    <li><a href="#features" data-nav>Craft</a></li>
+  </ul>
+  <span class="nav-credit">by Diego Melo</span>
+</nav>
+
+<!-- ░░░ HERO ░░░ -->
+<section id="hero">
+  <div class="h-noise"></div>
+  <div class="h-scales"></div>
+
+  <!-- Animated snake silhouettes -->
+  <svg class="h-snake l" viewBox="0 0 80 700" fill="none">
+    <path d="M40 0 C80 60,0 120,40 200 C80 280,0 340,40 420 C80 500,0 560,40 640 C60 670,40 700,40 700"
+      stroke="white" stroke-width="4" stroke-linecap="round" fill="none">
+      <animate attributeName="stroke-dasharray" values="0,2000;2000,0" dur="7s" repeatCount="indefinite"/>
+      <animate attributeName="stroke-dashoffset" values="0;-2000" dur="7s" repeatCount="indefinite"/>
+    </path>
+    <ellipse cx="40" cy="12" rx="20" ry="13" fill="white" opacity=".55"/>
+    <circle cx="33" cy="8" r="3.5" fill="#111"/><circle cx="47" cy="8" r="3.5" fill="#111"/>
+    <path d="M36 17 Q40 22 44 17" stroke="#111" stroke-width="1.5" fill="none"/>
+    <path d="M38 21 L34 29 M38 21 L42 29" stroke="white" stroke-width="1.5"/>
+  </svg>
+  <svg class="h-snake r" viewBox="0 0 80 700" fill="none">
+    <path d="M40 0 C80 60,0 120,40 200 C80 280,0 340,40 420 C80 500,0 560,40 640 C60 670,40 700,40 700"
+      stroke="white" stroke-width="4" stroke-linecap="round" fill="none">
+      <animate attributeName="stroke-dasharray" values="0,2000;2000,0" dur="9s" begin="3s" repeatCount="indefinite"/>
+      <animate attributeName="stroke-dashoffset" values="0;-2000" dur="9s" begin="3s" repeatCount="indefinite"/>
+    </path>
+    <ellipse cx="40" cy="12" rx="20" ry="13" fill="white" opacity=".55"/>
+    <circle cx="33" cy="8" r="3.5" fill="#111"/><circle cx="47" cy="8" r="3.5" fill="#111"/>
+    <path d="M36 17 Q40 22 44 17" stroke="#111" stroke-width="1.5" fill="none"/>
+    <path d="M38 21 L34 29 M38 21 L42 29" stroke="white" stroke-width="1.5"/>
+  </svg>
+
+  <div class="h-content">
+    <p class="h-pre">Coleção Primavera · MMXXVI</p>
+    <h1 class="h-title">VIPER</h1>
+    <div class="h-sep"></div>
+    <p class="h-tag">Preciso. Letal. Elegante.</p>
+    <div class="h-ctas">
+      <button class="btn btn-w hoverable" data-scroll="#collection">Ver Coleção</button>
+      <button class="btn btn-g hoverable" data-scroll="#manifesto">Manifesto</button>
+    </div>
+  </div>
+
+  <div class="h-scroll">
+    <span>Scroll</span>
+    <div class="h-sline"></div>
+  </div>
+</section>
+
+<!-- ░░░ MANIFESTO ░░░ -->
+<section id="manifesto">
+  <div style="display:grid;grid-template-columns:1fr 1fr;min-height:100vh;border-top:1px solid var(--slate)">
+    <div class="m-left">
+      <p class="eyebrow fu">/ Manifesto</p>
+      <h2 class="m-title sr">
+        <span class="w"><span class="i">A Arte</span></span>
+        <span class="w"><span class="i">de</span></span>
+        <span class="w"><span class="i">Mover</span></span>
+        <span class="w"><span class="i">em</span></span>
+        <span class="w"><span class="i">Silêncio</span></span>
+        <em class="fu d3">O poder que não pede licença</em>
+      </h2>
+      <p class="m-body fu d2">
+        Como a <strong>víbora</strong> que aguarda no silêncio da sombra, cada peça VIPER é concebida com paciência extrema. Não fazemos barulho. Fazemos impacto.<br><br>
+        Cada detalhe, cada costura, cada linha é calculada com a mesma precisão de um réptil que conhece o seu momento. Quando chegamos, já é tarde.
+      </p>
+      <blockquote class="m-quote fu d3">"O poder verdadeiro não se anuncia. Veste-se."</blockquote>
+    </div>
+    <div class="m-right">
+      <div class="m-snake">
+        <!-- Cobra SVG (hood raised) -->
+        <svg viewBox="0 0 400 500" fill="none">
+          <path d="M200 460 C270 460,330 410,330 350 C330 290,280 265,230 272 C180 279,140 310,155 355 C170 395,215 405,245 385 C275 365,270 330,248 318 C226 306,205 318,208 335 C211 350,225 353,232 343"
+            stroke="white" stroke-width="14" stroke-linecap="round" fill="none"/>
+          <path d="M200 460 C185 430,165 390,160 340 C155 290,170 250,190 200 C205 165,200 110,200 60"
+            stroke="white" stroke-width="12" stroke-linecap="round" fill="none"/>
+          <!-- Hood -->
+          <path d="M200 100 C155 95,115 80,110 55 C105 30,140 15,170 20 C150 25,145 42,165 48 C155 38,170 30,185 38 C175 35,178 50,200 52" stroke="white" stroke-width="3" fill="none"/>
+          <path d="M200 100 C245 95,285 80,290 55 C295 30,260 15,230 20 C250 25,255 42,235 48 C245 38,230 30,215 38 C225 35,222 50,200 52" stroke="white" stroke-width="3" fill="none"/>
+          <!-- Scales on coil -->
+          <path d="M270 310 Q278 302 286 310" stroke="rgba(255,255,255,.25)" stroke-width="2" fill="none"/>
+          <path d="M248 340 Q256 332 264 340" stroke="rgba(255,255,255,.2)" stroke-width="2" fill="none"/>
+          <path d="M220 365 Q228 357 236 365" stroke="rgba(255,255,255,.18)" stroke-width="2" fill="none"/>
+          <path d="M185 280 Q193 272 201 280" stroke="rgba(255,255,255,.18)" stroke-width="2" fill="none"/>
+          <path d="M184 250 Q192 242 200 250" stroke="rgba(255,255,255,.15)" stroke-width="2" fill="none"/>
+          <!-- Head -->
+          <ellipse cx="200" cy="68" rx="28" ry="18" fill="white" opacity=".75"/>
+          <ellipse cx="188" cy="64" rx="6" ry="5" fill="#111"/>
+          <ellipse cx="212" cy="64" rx="6" ry="5" fill="#111"/>
+          <ellipse cx="188" cy="63" rx="2" ry="3.5" fill="#333"/>
+          <ellipse cx="212" cy="63" rx="2" ry="3.5" fill="#333"/>
+          <circle cx="189" cy="62" r="1" fill="white" opacity=".4"/>
+          <circle cx="213" cy="62" r="1" fill="white" opacity=".4"/>
+          <path d="M191 75 Q200 81 209 75" stroke="#333" stroke-width="1.5" fill="none"/>
+          <path d="M197 80 L192 90 M197 80 L202 90" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="m-rl">Viper — Est. MMXXVI</span>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="mq">
+  <div class="mq-inner">
+    <span class="mq-item">VIPER<span class="mq-dot"></span></span>
+    <span class="mq-item">PRECISION CRAFT<span class="mq-dot"></span></span>
+    <span class="mq-item">COLEÇÃO 2026<span class="mq-dot"></span></span>
+    <span class="mq-item">LETAL POR NATUREZA<span class="mq-dot"></span></span>
+    <span class="mq-item">STRIKE · SHADOW · VENOM<span class="mq-dot"></span></span>
+    <span class="mq-item">DIEGO MELO<span class="mq-dot"></span></span>
+    <span class="mq-item">VIPER<span class="mq-dot"></span></span>
+    <span class="mq-item">PRECISION CRAFT<span class="mq-dot"></span></span>
+    <span class="mq-item">COLEÇÃO 2026<span class="mq-dot"></span></span>
+    <span class="mq-item">LETAL POR NATUREZA<span class="mq-dot"></span></span>
+    <span class="mq-item">STRIKE · SHADOW · VENOM<span class="mq-dot"></span></span>
+    <span class="mq-item">DIEGO MELO<span class="mq-dot"></span></span>
+  </div>
+</div>
+
+<!-- ░░░ COLLECTION ░░░ -->
+<section id="collection">
+  <div class="col-hdr fu">
+    <div>
+      <p class="eyebrow">/ Coleção Principal</p>
+      <h2 class="col-title">Produtos</h2>
+    </div>
+    <p class="col-desc">Três peças. Três filosofias. Uma identidade que não pede desculpas.</p>
+  </div>
+
+  <div class="pgrid">
+    <!-- Card 1 — Strike -->
+    <div class="pcard pcard-1 hoverable">
+      <div class="pv">
+        <div class="pscales"></div>
+        <div class="cm cm-tl"></div><div class="cm cm-tr"></div>
+        <span class="pref">VPR — 001</span>
+        <div class="picon">
+          <svg viewBox="0 0 120 180" fill="none">
+            <path d="M25 20 L10 50 L10 170 L110 170 L110 50 L95 20Z" stroke="white" stroke-width="2" fill="none"/>
+            <path d="M60 20 L60 170" stroke="white" stroke-width="1.5" opacity=".4"/>
+            <path d="M25 20 C35 30 45 35 60 36 C75 35 85 30 95 20" stroke="white" stroke-width="1.5" fill="none" opacity=".5"/>
+            <path d="M10 65 L25 55 M110 65 L95 55" stroke="white" stroke-width="1.5" opacity=".4"/>
+            <path d="M28 88 Q38 80 48 88 Q58 80 68 88 Q78 80 88 88 Q98 80 108 88" stroke="rgba(255,255,255,.18)" stroke-width="1" fill="none"/>
+            <path d="M28 104 Q38 96 48 104 Q58 96 68 104 Q78 96 88 104 Q98 96 108 104" stroke="rgba(255,255,255,.14)" stroke-width="1" fill="none"/>
+            <path d="M28 120 Q38 112 48 120 Q58 112 68 120 Q78 112 88 120 Q98 112 108 120" stroke="rgba(255,255,255,.1)" stroke-width="1" fill="none"/>
+          </svg>
+        </div>
+        <div class="prev">
+          <div class="prev-series">Strike Series</div>
+          <div class="prev-name">Casaco Strike</div>
+          <div class="prev-desc">Corte técnico de precisão cirúrgica. Forro em escamas micro-texturizadas.</div>
+        </div>
+      </div>
+      <div class="pinfo">
+        <span class="pname">Casaco Strike</span>
+        <span class="ptag">Strike</span>
+      </div>
+    </div>
+
+    <!-- Card 2 — Shadow -->
+    <div class="pcard pcard-2 hoverable">
+      <div class="pv">
+        <div class="pscales"></div>
+        <div class="cm cm-tl"></div><div class="cm cm-tr"></div>
+        <span class="pref">VPR — 002</span>
+        <div class="picon">
+          <svg viewBox="0 0 120 180" fill="none">
+            <rect x="35" y="55" width="50" height="70" rx="12" stroke="white" stroke-width="2" fill="none"/>
+            <rect x="42" y="62" width="36" height="56" rx="8" stroke="white" stroke-width="1" fill="none" opacity=".4"/>
+            <rect x="44" y="20" width="32" height="38" rx="5" stroke="white" stroke-width="1.5" fill="none" opacity=".5"/>
+            <rect x="44" y="122" width="32" height="38" rx="5" stroke="white" stroke-width="1.5" fill="none" opacity=".5"/>
+            <rect x="87" y="83" width="10" height="14" rx="3" stroke="white" stroke-width="1.5" fill="none" opacity=".6"/>
+            <line x1="60" y1="90" x2="60" y2="73" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <line x1="60" y1="90" x2="72" y2="84" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity=".7"/>
+            <circle cx="60" cy="90" r="3" fill="white" opacity=".6"/>
+            <path d="M47 28 Q52 24 57 28 Q62 24 67 28 Q72 24 77 28" stroke="rgba(255,255,255,.22)" stroke-width="1" fill="none"/>
+            <path d="M47 37 Q52 33 57 37 Q62 33 67 37 Q72 33 77 37" stroke="rgba(255,255,255,.16)" stroke-width="1" fill="none"/>
+          </svg>
+        </div>
+        <div class="prev">
+          <div class="prev-series">Shadow Series</div>
+          <div class="prev-name">Relógio Shadow</div>
+          <div class="prev-desc">Bracelete em pele de cobra. Mostrador mineral. Edição limitada a 200 unidades.</div>
+        </div>
+      </div>
+      <div class="pinfo">
+        <span class="pname">Relógio Shadow</span>
+        <span class="ptag">Shadow</span>
+      </div>
+    </div>
+
+    <!-- Card 3 — Venom -->
+    <div class="pcard pcard-3 hoverable" style="border-right:none">
+      <div class="pv">
+        <div class="pscales"></div>
+        <div class="cm cm-tl"></div><div class="cm cm-tr"></div>
+        <span class="pref">VPR — 003</span>
+        <div class="picon">
+          <svg viewBox="0 0 120 160" fill="none">
+            <path d="M20 55 L20 145 Q20 150 25 150 L95 150 Q100 150 100 145 L100 55Z" stroke="white" stroke-width="2" fill="none"/>
+            <path d="M20 55 Q20 30 60 25 Q100 30 100 55" stroke="white" stroke-width="2" fill="none"/>
+            <rect x="48" y="45" width="24" height="18" rx="4" stroke="white" stroke-width="1.5" fill="none" opacity=".6"/>
+            <circle cx="60" cy="54" r="4" stroke="white" stroke-width="1.5" fill="none" opacity=".5"/>
+            <path d="M38 25 C38 10,82 10,82 25" stroke="white" stroke-width="2" fill="none" opacity=".5"/>
+            <path d="M28 73 Q36 65 44 73 Q52 65 60 73 Q68 65 76 73 Q84 65 92 73" stroke="rgba(255,255,255,.18)" stroke-width="1" fill="none"/>
+            <path d="M28 89 Q36 81 44 89 Q52 81 60 89 Q68 81 76 89 Q84 81 92 89" stroke="rgba(255,255,255,.14)" stroke-width="1" fill="none"/>
+            <path d="M28 105 Q36 97 44 105 Q52 97 60 105 Q68 97 76 105 Q84 97 92 105" stroke="rgba(255,255,255,.1)" stroke-width="1" fill="none"/>
+            <path d="M28 121 Q36 113 44 121 Q52 113 60 121 Q68 113 76 121 Q84 113 92 121" stroke="rgba(255,255,255,.07)" stroke-width="1" fill="none"/>
+          </svg>
+        </div>
+        <div class="prev">
+          <div class="prev-series">Venom Series</div>
+          <div class="prev-name">Bolsa Venom</div>
+          <div class="prev-desc">Couro ecológico com padrão de escamas gravado a laser. Forro interior acetinado.</div>
+        </div>
+      </div>
+      <div class="pinfo">
+        <span class="pname">Bolsa Venom</span>
+        <span class="ptag">Venom</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░░ FEATURES ░░░ -->
+<section id="features">
+  <div class="feat-hdr fu">
+    <p class="eyebrow">/ Craft</p>
+    <h2 class="col-title">Filosofia</h2>
+  </div>
+  <div class="fgrid">
+    <div class="feat fu d1"><div class="fn">01</div><div class="ft">Precisão Cirúrgica</div><p class="fb">Cada corte, cada costura calculada com tolerância de milímetros. Nenhum detalhe é acidente.</p><div class="fl"></div></div>
+    <div class="feat fu d2"><div class="fn">02</div><div class="ft">Materiais Premium</div><p class="fb">Tecidos de origem seleccionada. Apenas o que merece o nome Viper entra em produção.</p><div class="fl"></div></div>
+    <div class="feat fu d3"><div class="fn">03</div><div class="ft">Edições Limitadas</div><p class="fb">Raridade intencional. A víbora não se mostra a todos. Cada série tem o seu número.</p><div class="fl"></div></div>
+    <div class="feat fu d4"><div class="fn">04</div><div class="ft">Entrega Silenciosa</div><p class="fb">Embalagem negra sem logos exteriores. O impacto começa antes de abrir a caixa.</p><div class="fl"></div></div>
+  </div>
+</section>
+
+<!-- ░░░ FOOTER ░░░ -->
+<footer>
+  <div class="ft-top fu">
+    <div>
+      <div class="f-logo">VIPER</div>
+      <p class="f-desc">Feito para os que se movem em silêncio e chegam em força. A marca que respira precisão.</p>
+    </div>
+    <div class="fc"><h4>Coleções</h4><ul><li>Strike Series</li><li>Shadow Series</li><li>Venom Series</li><li>Edições Limitadas</li></ul></div>
+    <div class="fc"><h4>Empresa</h4><ul><li>Manifesto</li><li>Atelier</li><li>Colaborações</li><li>Imprensa</li></ul></div>
+    <div class="fc"><h4>Apoio</h4><ul><li>Guia de Tamanhos</li><li>Envios & Devoluções</li><li>Contacto</li><li>FAQ</li></ul></div>
+  </div>
+  <div class="ft-bot">
+    <span class="f-copy">© 2026 Viper. Todos os direitos reservados.</span>
+    <div class="f-soc"><a href="#">Instagram</a><a href="#">TikTok</a><a href="#">Pinterest</a></div>
+    <span class="f-dev">Desenvolvido por <span>Diego Melo</span></span>
+  </div>
+</footer>
+
+<script>
+/* LOADER */
+(function(){
+  const bar=document.getElementById('lbar'),pct=document.getElementById('lpct'),ldr=document.getElementById('loader');
+  let p=0;
+  const iv=setInterval(()=>{
+    p+=Math.random()*16+4;
+    if(p>=100){p=100;clearInterval(iv);}
+    bar.style.width=p+'%'; pct.textContent=Math.floor(p)+'%';
+    if(p>=100){
+      setTimeout(()=>{
+        ldr.classList.add('gone');
+        const ov=document.getElementById('tov');
+        ov.classList.add('in');
+        setTimeout(()=>{ov.classList.remove('in');ov.classList.add('out');
+          setTimeout(()=>ov.classList.remove('out'),700);},280);
+      },450);
+    }
+  },70);
+})();
+
+/* CURSOR */
+const cur=document.getElementById('cur'),ring=document.getElementById('cur-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+(function a(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(a);})();
+
+/* TRANSITION SCROLL */
+function goTo(sel){
+  const el=document.querySelector(sel); if(!el)return;
+  const ov=document.getElementById('tov');
+  ov.classList.add('in');
+  setTimeout(()=>{
+    el.scrollIntoView({behavior:'instant'});
+    ov.classList.remove('in');ov.classList.add('out');
+    setTimeout(()=>ov.classList.remove('out'),700);
+  },360);
+}
+document.querySelectorAll('[data-scroll]').forEach(b=>b.addEventListener('click',()=>goTo(b.dataset.scroll)));
+document.querySelectorAll('[data-nav]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();goTo(a.getAttribute('href'));}));
+
+/* SCROLL REVEAL */
+const obs=new IntersectionObserver(en=>{en.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis');});},{threshold:.1});
+document.querySelectorAll('.fu,.sr').forEach(el=>obs.observe(el));
+
+/* PARALLAX */
+window.addEventListener('scroll',()=>{
+  const sy=window.scrollY;
+  document.querySelectorAll('.h-snake').forEach((s,i)=>{
+    const tx=i===1?' scaleX(-1)':'';
+    s.style.transform=`translateY(${sy*(i===0?.07:-.07)}px)`+tx;
+  });
+  const ht=document.querySelector('.h-title');
+  if(ht)ht.style.transform=`translateY(${sy*.14}px)`;
+});
+</script>
+</body>
+</html>
